@@ -6,38 +6,39 @@ capabilities=CAPABILITY_NAMED_IAM
 region=us-west-2
 
 
-##### validate the parameters
+#Check parameters
 if [ -z $stack_name ] || [ -z $template ] || [ -z $parameters ]
 then
     echo
     echo 'Error:  Invalid parameters!!!'
     echo
-    echo 'Usage:  update-stack <stack-name> <template file> <param file>'
+    echo 'Usage:  update--stack <stack-name> <template_file> <param_file>'
     echo
     exit 1
 fi
 
 
-##### validate template and parameters
+# Check template, params
 aws cloudformation validate-template --template-body file://$template > /dev/null 2>&1
 
 if [ $? -gt 0 ]
 then
-    # show the error (which means running the validate again)
+    #Print Err
     aws cloudformation validate-template --template-body file://$template
     exit 1
 else
     echo
-    echo "Template $template is valid"
+    echo "Your template $template is valid!!!"
 fi
 
 
-##### check if stack exist
+#Check Stack existence
 aws cloudformation describe-stacks --stack-name $stack_name > /dev/null 2>&1
 response=$?
 if [ $response -eq 254 ]
 then
     echo
+    echo 'Success!'
     echo 'Creating stack...'
     cfn_cmd='create-stack'
 elif [ $response -eq 0 ]
@@ -46,8 +47,9 @@ then
     echo 'Updating stack...'
     cfn_cmd='update-stack'
 else
-    echo 'Unknown exception ...exiting!'
-    echo 'test = ' [$response -eq 255]
+    echo 'Ops!   Unknown exception caught!'
+    echo 'Cause = ' [$response -eq 255]
+    echo '...exiting!'
     exit 1
 fi
 
@@ -62,8 +64,8 @@ aws cloudformation $cfn_cmd \
 
 if [ $? -eq 0 ]
 then
-    echo 'Command executed successfully... check AWS console for status.'
+    echo 'Operation completed successfully... check your AWS console for status.'
 fi
 echo
-echo 'Done.'
+echo 'Complete!!!'
 echo
